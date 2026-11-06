@@ -54,7 +54,7 @@ sistem tepsisinde canlı yüzde gösteren bir ikon olarak kalır.
 [Node.js](https://nodejs.org/) 20+ gerekir.
 
 ```bash
-git clone https://github.com/<kullanici-adi>/u1-farm-control.git
+git clone https://github.com/g4zi/u1-farm-control.git
 cd u1-farm-control
 npm install
 npm start

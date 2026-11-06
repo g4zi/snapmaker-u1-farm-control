@@ -15,6 +15,14 @@
   ],
   "author": "Kemal Tarık Arıcıoğlu",
   "license": "MIT",
+  "homepage": "https://github.com/g4zi/u1-farm-control#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/g4zi/u1-farm-control.git"
+  },
+  "bugs": {
+    "url": "https://github.com/g4zi/u1-farm-control/issues"
+  },
   "main": "main.js",
   "scripts": {
     "start": "electron .",
