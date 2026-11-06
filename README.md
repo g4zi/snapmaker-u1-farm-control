@@ -4,6 +4,8 @@ A Windows desktop dashboard for running a small print farm of **Snapmaker U1** p
 See every printer on one screen. When you minimize it, each printer stays in the system
 tray next to the clock as an icon that shows its live print percentage.
 
+**Website:** https://g4zi.github.io/u1-farm-control/ · **Download:** [latest release](https://github.com/g4zi/u1-farm-control/releases/latest)
+
 ![Screenshot](docs/screenshot.png)
 
 Available in **English, Türkçe, Deutsch, Español and Français**. The app follows your Windows
