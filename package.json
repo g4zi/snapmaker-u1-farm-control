@@ -2,7 +2,7 @@
   "name": "u1-farm-control",
   "productName": "U1 Farm Control",
   "version": "1.0.0",
-  "description": "Snapmaker U1 3D yazıcılar için Windows baskı çiftliği kontrol paneli — tepside canlı yüzde, kamera, filament ve baskı kontrolü.",
+  "description": "Windows print farm dashboard for Snapmaker U1 printers: live progress in the system tray, camera, filament unload and print controls.",
   "keywords": [
     "snapmaker",
     "snapmaker-u1",

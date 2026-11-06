@@ -1,57 +1,59 @@
 # U1 Farm Control
 
-**Snapmaker U1** 3D yazıcılar için Windows masaüstü baskı çiftliği kontrol paneli.
-Birden fazla yazıcıyı tek ekrandan izleyin; uygulamayı küçültünce her yazıcı saatin yanındaki
-sistem tepsisinde canlı yüzde gösteren bir ikon olarak kalır.
+A Windows desktop dashboard for running a small print farm of **Snapmaker U1** printers.
+See every printer on one screen. When you minimize it, each printer stays in the system
+tray next to the clock as an icon that shows its live print percentage.
 
-> *A Windows print-farm dashboard for Snapmaker U1 printers with live progress in the system tray,
-> camera view, filament unload and print controls. UI is in Turkish — see [English](#english) below.*
+![Screenshot](docs/screenshot.png)
 
-![Ekran görüntüsü](docs/screenshot.png)
+> The app's interface is currently in Turkish. Translations are welcome. See [Contributing](#contributing).
 
-## Özellikler
+## Features
 
-- **Tepsi ikonları** — her yazıcı için saatin yanında ayrı ikon; içinde baskı yüzdesi yazar,
-  arka plan ilerledikçe dolar. Renk durumu gösterir (yeşil yazdırıyor, turuncu duraklatıldı,
-  mavi ✓ bitti, kırmızı hata, gri çevrimdışı). Üzerine gelince kalan süre ve dosya adı görünür.
+- **Tray icons with live progress.** Each printer gets its own icon next to the clock. The icon
+  shows the print percentage and fills up as the print progresses. Its color shows the state:
+  green while printing, orange when paused, blue ✓ when finished, red on error and gray when offline.
+  Hover over it to see the remaining time and file name.
 
-  ![Tepsi ikonları](docs/tray-icons.png)
+  ![Tray icons](docs/tray-icons.png)
 
-- **Canlı kamera** — stok firmware'de dahili kamera kendiliğinden yayın yapmaz; uygulama
-  kamerayı otomatik uyandırır ve görüntüyü gösterir (~1 kare/sn).
-- **Baskı bilgisi** — ilerleme, kalan süre, tahmini bitiş saati, katman, filament kullanımı,
-  anlık hız, dilimleyici önizlemesi.
-- **4 takım kafası** — her kafanın filament rengi/türü, sıcaklığı ve aktif kafa.
-- **Filament çıkarma** — tek kafadan, seçili kafalardan ya da hepsinden; yazıcının kendi
-  çıkarma akışını kullanır.
-- **Kontroller** — duraklat / devam / iptal, kabin ışığı, hız-akış-fan ayarı, sıcaklık ayarı,
-  ısıtıcıları kapatma, acil stop.
-- **Dosyalar ve geçmiş** — yazıcıdaki G-code dosyalarından baskı başlatma, geçmiş baskılar.
-- **Bildirimler** — baskı bitti, duraklatıldı, hata, bağlantı koptu.
-- Windows ile birlikte tepside gizli başlatma seçeneği.
+- **Live camera.** On stock firmware the built-in camera does not stream by itself. The app wakes
+  it up automatically and shows the feed at about 1 frame per second.
+- **Print details.** Progress, time remaining, estimated finish time, current layer, filament used,
+  live speed and the slicer thumbnail.
+- **All 4 toolheads.** Filament color and type, nozzle temperature, and which head is active.
+- **Filament unload.** Unload one head, the heads you select, or all of them. The app uses the
+  printer's own unload sequence.
+- **Controls.** Pause, resume, cancel, chamber light, speed, flow and fan sliders, temperatures,
+  turning off the heaters, and emergency stop.
+- **Files and history.** Start a print from the G-code files on the printer and browse past jobs.
+- **Notifications.** Alerts when a print finishes, pauses, fails, or a printer goes offline.
+- **Start with Windows**, hidden in the tray (optional).
 
-## Kurulum
+## Installation
 
-[Releases](../../releases) sayfasından son sürümü indirin:
+Download the latest version from the [Releases](https://github.com/g4zi/u1-farm-control/releases) page:
 
-- `U1-Farm-Control-Setup-x.y.z.exe` — kurulum sihirbazı
-- `U1-Farm-Control-Portable-x.y.z.exe` — kurulum gerektirmeyen tek dosya
+- `U1-Farm-Control-Setup-x.y.z.exe`: installer
+- `U1-Farm-Control-Portable-x.y.z.exe`: a single file that runs without installing
 
-İlk açılışta **Ayarlar** penceresi açılır; yazıcılarınızın yerel ağdaki IP adreslerini girin.
+On first launch the **Settings** window opens. Enter the local IP address of each printer. You can
+find it in the printer's network settings on the touchscreen, or in your router's list of
+connected devices.
 
-> Kurulum dosyası dijital olarak imzalı olmadığı için Windows SmartScreen uyarı verebilir:
-> **Ek bilgi → Yine de çalıştır**.
+> The executables are not code-signed, so Windows SmartScreen may show a warning.
+> Click **More info → Run anyway**.
 
-### Gereksinimler
+### Requirements
 
-- Windows 10 / 11 (x64)
-- Snapmaker U1 (stok firmware ile test edildi, sürüm `2.0.0.205`)
-- Bilgisayar ve yazıcılar aynı yerel ağda olmalı. Uygulama yazıcıya doğrudan bağlanır
-  (Moonraker API, port `7125`); bulut ya da hesap gerekmez.
+- Windows 10 or 11 (x64)
+- Snapmaker U1. Tested with stock firmware `2.0.0.205`.
+- The PC and the printers must be on the same local network. The app talks to each printer
+  directly over its Moonraker API on port `7125`. No cloud service or account is needed.
 
-## Kaynaktan çalıştırma
+## Running from source
 
-[Node.js](https://nodejs.org/) 20+ gerekir.
+Requires [Node.js](https://nodejs.org/) 20 or newer.
 
 ```bash
 git clone https://github.com/g4zi/u1-farm-control.git
@@ -60,61 +62,49 @@ npm install
 npm start
 ```
 
-Windows kurulum dosyası üretmek için:
+To build the Windows installer and the portable exe:
 
 ```bash
 npm run dist
 ```
 
-Çıktılar `dist/` klasörüne yazılır. Depoya `v1.2.3` biçiminde bir etiket gönderildiğinde
-GitHub Actions kurulum dosyalarını derleyip otomatik olarak bir Release oluşturur.
+The files are written to `dist/`. When you push a tag such as `v1.2.3`, GitHub Actions builds
+the installers and publishes them as a new release.
 
-## Nasıl çalışır
+## How it works
 
-| Ne | Nasıl |
+| What | How |
 |---|---|
-| Durum | 2 saniyede bir `GET /printer/objects/query` (Moonraker) |
-| Kamera | Websocket üzerinden `camera.start_monitor` (`{"domain":"lan"}`) çağrısı 8 sn'de bir tekrarlanır; kareler `/server/files/camera/monitor.jpg` adresinden okunur |
-| Filament çıkarma | `AUTO_FEEDING_BATCH` ile `AUTO_FEEDING EXTRUDER=n UNLOAD=1 STAGE=prepare/doing` — yazıcının ekranının kullandığı akış |
-| Tepsi ikonu | Arayüzde canvas ile çizilip Electron `Tray` ikonuna aktarılır |
+| Status | Polls `GET /printer/objects/query` on Moonraker every 2 seconds |
+| Camera | Sends `camera.start_monitor` (`{"domain":"lan"}`) over the Moonraker websocket every 8 seconds, then reads frames from `/server/files/camera/monitor.jpg` |
+| Filament unload | `AUTO_FEEDING_BATCH` with `AUTO_FEEDING EXTRUDER=n UNLOAD=1 STAGE=prepare/doing`, the same sequence the touchscreen uses |
+| Tray icon | Drawn on a canvas in the renderer and passed to the Electron `Tray` |
 
-Kod yapısı:
+Project layout:
 
 ```
-main.js            Electron ana süreç: yoklama, tepsi, bildirimler, yazıcı komutları
-preload.js         Arayüz ↔ ana süreç köprüsü
-renderer/          Panel arayüzü (HTML / CSS / JS, framework yok)
-assets/            Uygulama ikonu
+main.js            Electron main process: polling, tray icons, notifications, printer commands
+preload.js         Bridge between the UI and the main process
+renderer/          Dashboard UI (plain HTML, CSS and JS, no framework)
+assets/            App icon
 ```
 
-Ayarlar `%APPDATA%\U1 Farm Control\config.json` dosyasında saklanır.
+Settings are stored in `%APPDATA%\U1 Farm Control\config.json`.
 
-## Uyarı
+## Contributing
 
-Bu proje Snapmaker ile bağlantılı değildir ve resmi değildir. Kullandığı komutlar stok
-firmware'den okunmuştur; firmware güncellemeleri davranışı değiştirebilir. Filament çıkarma,
-acil stop gibi işlemler yazıcınızı fiziksel olarak hareket ettirir — kendi sorumluluğunuzda kullanın.
+Issues and pull requests are welcome. Ideas that would help most:
 
-## Lisans
+- English and other UI translations
+- macOS and Linux builds (the code is cross-platform Electron; only the builds are missing)
+- Testing with other firmware versions
+
+## Disclaimer
+
+This is a community project. It is not affiliated with or endorsed by Snapmaker. The commands it
+sends were read from the stock firmware, and a firmware update may change how they behave. Actions
+such as filament unload and emergency stop physically move your printer. Use at your own risk.
+
+## License
 
 [MIT](LICENSE)
-
----
-
-## English
-
-**U1 Farm Control** is a Windows desktop dashboard for a farm of Snapmaker U1 printers.
-
-- One tray icon per printer next to the clock, showing live print percentage and state color
-- Live camera (wakes the stock U1 camera automatically via `camera.start_monitor`)
-- Progress, remaining time, ETA, layers, filament, speed and slicer thumbnail
-- All 4 toolheads with filament colors and temperatures
-- Filament unload per head, for selected heads or for all heads
-- Pause / resume / cancel, chamber light, speed / flow / fan, temperatures, emergency stop
-- File browser with "print" button, print history, desktop notifications
-
-Download the installer or portable exe from [Releases](../../releases), or run from source with
-`npm install && npm start`. On first launch, add your printers' LAN IP addresses in Settings.
-Talks directly to the printer's Moonraker API on port 7125; no cloud account is needed.
-
-Not affiliated with Snapmaker. Use at your own risk.
