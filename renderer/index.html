@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data: http:; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self' http:" />
+  <title>U1 Farm Control</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <img src="../assets/icon.png" alt="" />
+      <div>
+        <h1>U1 Farm Control</h1>
+        <span class="sub">Snapmaker U1 baskı çiftliği</span>
+      </div>
+    </div>
+    <div class="summary" id="summary"></div>
+    <div class="top-actions">
+      <button class="btn ghost" id="btnSettings" title="Ayarlar">⚙ Ayarlar</button>
+    </div>
+  </header>
+
+  <section id="empty" class="empty" hidden>
+    <img src="../assets/icon.png" alt="" />
+    <h2>Henüz yazıcı eklenmedi</h2>
+    <p>Snapmaker U1 yazıcınızın yerel ağdaki IP adresini girerek başlayın.<br />
+      IP adresini yazıcının dokunmatik ekranındaki ağ ayarlarında ya da modeminizin bağlı cihazlar listesinde bulabilirsiniz.</p>
+    <button class="btn primary" id="emptyAdd">+ Yazıcı ekle</button>
+  </section>
+  <main id="grid" class="grid"></main>
+
+  <!-- Ayarlar -->
+  <dialog id="settings">
+    <form method="dialog" class="dlg">
+      <h2>Ayarlar</h2>
+      <div id="printerRows"></div>
+      <button type="button" class="btn ghost small" id="addPrinter">+ Yazıcı ekle</button>
+      <hr />
+      <label class="check"><input type="checkbox" id="optTrayPer" /> Her yazıcı için ayrı tepsi ikonu (saatin yanında)</label>
+      <label class="check"><input type="checkbox" id="optNotif" /> Baskı bitti / hata bildirimleri</label>
+      <label class="check"><input type="checkbox" id="optAutostart" /> Windows ile başlat (tepside gizli)</label>
+      <label class="check"><input type="checkbox" id="optStartMin" /> Uygulama tepside küçültülmüş açılsın</label>
+      <div class="dlg-actions">
+        <button class="btn ghost" value="cancel">Vazgeç</button>
+        <button class="btn primary" id="saveSettings" value="ok">Kaydet</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Onay -->
+  <dialog id="confirm">
+    <form method="dialog" class="dlg small">
+      <h2 id="confirmTitle">Emin misiniz?</h2>
+      <p id="confirmText"></p>
+      <div class="dlg-actions">
+        <button class="btn ghost" value="no">Vazgeç</button>
+        <button class="btn danger" value="yes">Evet</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Dosyalar / geçmiş -->
+  <dialog id="files">
+    <div class="dlg wide">
+      <div class="dlg-head"><h2 id="filesTitle">Dosyalar</h2><button class="btn ghost small" id="filesClose">✕</button></div>
+      <div class="tabs"><button class="tab active" data-tab="files">Dosyalar</button><button class="tab" data-tab="history">Geçmiş</button></div>
+      <input id="fileSearch" class="input" placeholder="Ara…" />
+      <div id="filesList" class="files-list"></div>
+    </div>
+  </dialog>
+
+  <div id="toast" class="toast"></div>
+  <canvas id="trayCanvas" width="32" height="32" hidden></canvas>
+  <script src="app.js"></script>
+</body>
+</html>

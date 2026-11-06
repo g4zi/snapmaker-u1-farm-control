@@ -1,0 +1,70 @@
+{
+  "name": "u1-farm-control",
+  "productName": "U1 Farm Control",
+  "version": "1.0.0",
+  "description": "Snapmaker U1 3D yazıcılar için Windows baskı çiftliği kontrol paneli — tepside canlı yüzde, kamera, filament ve baskı kontrolü.",
+  "keywords": [
+    "snapmaker",
+    "snapmaker-u1",
+    "3d-printer",
+    "print-farm",
+    "klipper",
+    "moonraker",
+    "electron",
+    "system-tray"
+  ],
+  "author": "Kemal Tarık Arıcıoğlu",
+  "license": "MIT",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder --win",
+    "dist:dir": "electron-builder --win --dir"
+  },
+  "build": {
+    "appId": "com.u1farm.control",
+    "productName": "U1 Farm Control",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "renderer/**/*",
+      "assets/**/*",
+      "package.json"
+    ],
+    "win": {
+      "icon": "assets/icon.ico",
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "artifactName": "U1-Farm-Control-Setup-${version}.${ext}"
+    },
+    "portable": {
+      "artifactName": "U1-Farm-Control-Portable-${version}.${ext}"
+    }
+  },
+  "dependencies": {
+    "ws": "^8.22.1"
+  },
+  "devDependencies": {
+    "electron": "^33.2.1",
+    "electron-builder": "^25.1.8"
+  }
+}
