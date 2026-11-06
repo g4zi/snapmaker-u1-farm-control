@@ -6,7 +6,7 @@ camera, print progress, all four toolheads, filament unload and print controls. 
 it, each Snapmaker U1 stays in the system tray next to the clock as an icon that shows its live
 print percentage.
 
-**Website:** https://g4zi.github.io/u1-farm-control/ · **Download:** [latest release](https://github.com/g4zi/u1-farm-control/releases/latest)
+**Website:** https://g4zi.github.io/snapmaker-u1-farm-control/ · **Download:** [latest release](https://github.com/g4zi/snapmaker-u1-farm-control/releases/latest)
 
 ![U1 Farm Control dashboard monitoring two Snapmaker U1 printers](docs/screenshot.png)
 
@@ -38,7 +38,7 @@ language by default; you can change it in Settings.
 
 ## Download and install
 
-Download the latest version from the [Releases](https://github.com/g4zi/u1-farm-control/releases) page:
+Download the latest version from the [Releases](https://github.com/g4zi/snapmaker-u1-farm-control/releases) page:
 
 - `U1-Farm-Control-Setup-x.y.z.exe`: installer
 - `U1-Farm-Control-Portable-x.y.z.exe`: a single file that runs without installing
@@ -64,8 +64,8 @@ connected devices.
 Requires [Node.js](https://nodejs.org/) 20 or newer.
 
 ```bash
-git clone https://github.com/g4zi/u1-farm-control.git
-cd u1-farm-control
+git clone https://github.com/g4zi/snapmaker-u1-farm-control.git
+cd snapmaker-u1-farm-control
 npm install
 npm start
 ```

@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://g4zi.github.io/u1-farm-control/sitemap.xml
+Sitemap: https://g4zi.github.io/snapmaker-u1-farm-control/sitemap.xml

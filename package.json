@@ -19,13 +19,13 @@
   ],
   "author": "Kemal Tarık Arıcıoğlu",
   "license": "MIT",
-  "homepage": "https://g4zi.github.io/u1-farm-control/",
+  "homepage": "https://g4zi.github.io/snapmaker-u1-farm-control/",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/g4zi/u1-farm-control.git"
+    "url": "git+https://github.com/g4zi/snapmaker-u1-farm-control.git"
   },
   "bugs": {
-    "url": "https://github.com/g4zi/u1-farm-control/issues"
+    "url": "https://github.com/g4zi/snapmaker-u1-farm-control/issues"
   },
   "main": "main.js",
   "scripts": {
