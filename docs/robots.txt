@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://g4zi.github.io/u1-farm-control/sitemap.xml
