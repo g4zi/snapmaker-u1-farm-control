@@ -5,6 +5,7 @@ const { app, BrowserWindow, Tray, Menu, nativeImage, ipcMain, Notification, shel
 const path = require('path');
 const fs = require('fs');
 const WebSocket = require('ws');
+const I18N = require('./renderer/i18n.js');
 
 const POLL_MS = 2000;
 const DEFAULT_CONFIG = {
@@ -113,10 +114,11 @@ function progressOf(s) {
   return Math.max(0, Math.min(1, p));
 }
 
-const STATE_TR = {
-  printing: 'Yazdırıyor', paused: 'Duraklatıldı', complete: 'Tamamlandı', cancelled: 'İptal edildi',
-  error: 'Hata', standby: 'Hazır', offline: 'Çevrimdışı',
-};
+// Dil: config.language ('auto' → sistem dili)
+let L = I18N.make('en');
+const t = (k, v) => L.t(k, v);
+function applyLanguage() { L = I18N.make(I18N.resolve(config.language, app.getLocale())); }
+const stateName = (st) => t('state.' + st);
 
 function handleTransitions(p, prev, s) {
   if (!config.notifications || !prev) return;
@@ -124,12 +126,12 @@ function handleTransitions(p, prev, s) {
   if (a === b) return;
   const file = s.status?.print_stats?.filename || prev.status?.print_stats?.filename || '';
   let title = null, body = file;
-  if (b === 'complete' && a === 'printing') title = `✅ ${p.name}: Baskı tamamlandı`;
-  else if (b === 'error') title = `⛔ ${p.name}: Hata`, body = s.status?.print_stats?.message || s.error || file;
-  else if (b === 'paused') title = `⏸ ${p.name}: Baskı duraklatıldı`;
-  else if (b === 'cancelled') title = `✖ ${p.name}: Baskı iptal edildi`;
-  else if (b === 'offline') title = `⚠ ${p.name}: Bağlantı kesildi`, body = p.host;
-  else if (b === 'printing' && (a === 'standby' || a === 'complete' || a === 'cancelled')) title = `▶ ${p.name}: Baskı başladı`;
+  if (b === 'complete' && a === 'printing') title = t('n.complete', { name: p.name });
+  else if (b === 'error') title = t('n.error', { name: p.name }), body = s.status?.print_stats?.message || s.error || file;
+  else if (b === 'paused') title = t('n.paused', { name: p.name });
+  else if (b === 'cancelled') title = t('n.cancelled', { name: p.name });
+  else if (b === 'offline') title = t('n.offline', { name: p.name }), body = p.host;
+  else if (b === 'printing' && (a === 'standby' || a === 'complete' || a === 'cancelled')) title = t('n.started', { name: p.name });
   if (title && Notification.isSupported()) {
     const n = new Notification({ title, body, icon: path.join(__dirname, 'assets', 'icon.png') });
     n.on('click', showWindow);
@@ -150,11 +152,11 @@ let trayImages = {}; // id -> dataURL
 function trayTooltip(p) {
   const s = states[p.id];
   const st = stateOf(s);
-  let t = `${p.name} — ${STATE_TR[st] || st}`;
+  let t = `${p.name} — ${stateName(st)}`;
   if (st === 'printing' || st === 'paused') {
-    t += ` %${Math.floor(progressOf(s) * 100)}`;
+    t += ' ' + L.t('pct', { n: Math.floor(progressOf(s) * 100) });
     const eta = etaSeconds(s);
-    if (eta != null) t += `\nKalan: ${fmtDur(eta)}`;
+    if (eta != null) t += '\n' + L.t('tray.remaining', { d: fmtDur(eta) });
     const fn = s.status.print_stats.filename || '';
     if (fn) t += `\n${fn.replace(/\.gcode$/i, '')}`;
   }
@@ -175,28 +177,24 @@ function etaSeconds(s) {
   }
   return byFile ?? bySlicer;
 }
-function fmtDur(sec) {
-  sec = Math.max(0, Math.round(sec));
-  const h = Math.floor(sec / 3600), m = Math.floor((sec % 3600) / 60);
-  return h > 0 ? `${h}sa ${m}dk` : `${m}dk`;
-}
+const fmtDur = (sec) => L.fmtDur(sec, true);
 
 function buildMenu() {
   const items = config.printers.map((p) => {
     const s = states[p.id];
     const st = stateOf(s);
-    const pct = (st === 'printing' || st === 'paused') ? ` — %${Math.floor(progressOf(s) * 100)}` : '';
-    return { label: `${p.name}: ${STATE_TR[st] || st}${pct}`, click: showWindow };
+    const pct = (st === 'printing' || st === 'paused') ? ' — ' + t('pct', { n: Math.floor(progressOf(s) * 100) }) : '';
+    return { label: `${p.name}: ${stateName(st)}${pct}`, click: showWindow };
   });
   return Menu.buildFromTemplate([
     { label: 'U1 Farm Control', enabled: false },
     { type: 'separator' },
     ...items,
     { type: 'separator' },
-    { label: 'Paneli Aç', click: showWindow },
-    ...config.printers.map((p) => ({ label: `${p.name} web arayüzü`, click: () => shell.openExternal(`http://${p.host}`) })),
+    { label: t('menu.open'), click: showWindow },
+    ...config.printers.map((p) => ({ label: t('menu.web', { name: p.name }), click: () => shell.openExternal(`http://${p.host}`) })),
     { type: 'separator' },
-    { label: 'Çıkış', click: () => { quitting = true; app.quit(); } },
+    { label: t('menu.quit'), click: () => { quitting = true; app.quit(); } },
   ]);
 }
 
@@ -233,7 +231,7 @@ function updateTrays() {
     }
   } else {
     const t = trays.__main;
-    t.setToolTip(config.printers.length ? config.printers.map(trayTooltip).join('\n').slice(0, 127) : 'U1 Farm Control — yazıcı eklenmedi');
+    t.setToolTip(config.printers.length ? config.printers.map(trayTooltip).join('\n').slice(0, 127) : t('tray.noPrinters'));
     t.setContextMenu(menu);
     if (trayImages.__main) t.setImage(nativeImage.createFromDataURL(trayImages.__main));
   }
@@ -280,12 +278,12 @@ function wakeCamera(host) {
       } catch {}
     });
     ws.on('error', (e) => finish(false, String(e.message || e)));
-    setTimeout(() => finish(false, 'zaman aşımı'), 6000);
+    setTimeout(() => finish(false, t('err.timeout')), 6000);
   });
 }
 ipcMain.handle('camera:wake', (_e, id) => {
   const p = config.printers.find((x) => x.id === id);
-  return p ? wakeCamera(p.host) : { ok: false, info: 'yazıcı yok' };
+  return p ? wakeCamera(p.host) : { ok: false, info: t('err.notFound') };
 });
 
 // ---------------- IPC ----------------
@@ -293,6 +291,7 @@ ipcMain.handle('config:get', () => config);
 ipcMain.handle('config:set', (_e, c) => {
   config = { ...config, ...c };
   saveConfig();
+  applyLanguage();
   metaCache = {};
   for (const id of Object.keys(states)) if (!config.printers.find((p) => p.id === id)) delete states[id];
   pollAll();
@@ -308,7 +307,7 @@ ipcMain.handle('open:external', (_e, url) => shell.openExternal(url));
 
 ipcMain.handle('printer:action', async (_e, { id, action, value }) => {
   const p = config.printers.find((x) => x.id === id);
-  if (!p) throw new Error('Yazıcı bulunamadı');
+  if (!p) throw new Error(t('err.notFound'));
   const gcode = (script) => api(p.host, '/printer/gcode/script?script=' + encodeURIComponent(script), { method: 'POST', timeout: 15000 });
   switch (action) {
     case 'pause': return api(p.host, '/printer/print/pause', { method: 'POST', timeout: 15000 });
@@ -327,13 +326,13 @@ ipcMain.handle('printer:action', async (_e, { id, action, value }) => {
       const list = Array.isArray(value) ? value : [value];
       const st = await api(p.host, '/printer/objects/query?print_stats&toolhead');
       const ps = st.status.print_stats?.state;
-      if (ps === 'printing' || ps === 'paused') throw new Error('Baskı sürerken filament çıkarılamaz');
+      if (ps === 'printing' || ps === 'paused') throw new Error(t('err.unloadPrinting'));
       const lines = [];
       if ((st.status.toolhead?.homed_axes || '') !== 'xyz') lines.push('G28');
       lines.push('AUTO_FEEDING_BATCH ACTION=START');
       for (const i of list) {
         const n = Number(i);
-        if (!(n >= 0 && n <= 3)) throw new Error('Geçersiz kafa');
+        if (!(n >= 0 && n <= 3)) throw new Error(t('err.badHead'));
         lines.push(`AUTO_FEEDING_BATCH ACTION=DOING EXTRUDER=${n} UNLOAD=1 STAGE=prepare`);
         lines.push(`AUTO_FEEDING_BATCH ACTION=DOING EXTRUDER=${n} UNLOAD=1 STAGE=doing`);
       }
@@ -345,7 +344,7 @@ ipcMain.handle('printer:action', async (_e, { id, action, value }) => {
     case 'history': return api(p.host, '/server/history/list?limit=15&order=desc');
     case 'files': return api(p.host, '/server/files/list?root=gcodes');
     case 'start': return api(p.host, '/printer/print/start?filename=' + encodeURIComponent(value), { method: 'POST', timeout: 15000 });
-    default: throw new Error('Bilinmeyen komut: ' + action);
+    default: throw new Error(t('err.unknown', { a: action }));
   }
 });
 
@@ -357,6 +356,7 @@ if (!app.requestSingleInstanceLock()) {
   app.setAppUserModelId('com.u1farm.control');
   app.whenReady().then(() => {
     config = loadConfig();
+    applyLanguage();
     startHidden = process.argv.includes('--hidden');
     createWindow();
     ensureTrays();

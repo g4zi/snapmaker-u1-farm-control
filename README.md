@@ -6,7 +6,8 @@ tray next to the clock as an icon that shows its live print percentage.
 
 ![Screenshot](docs/screenshot.png)
 
-> The app's interface is currently in Turkish. Translations are welcome. See [Contributing](#contributing).
+Available in **English, Türkçe, Deutsch, Español and Français**. The app follows your Windows
+language by default; you can change it in Settings.
 
 ## Features
 
@@ -95,7 +96,8 @@ Settings are stored in `%APPDATA%\U1 Farm Control\config.json`.
 
 Issues and pull requests are welcome. Ideas that would help most:
 
-- English and other UI translations
+- More translations. All UI text is in [`renderer/i18n.js`](renderer/i18n.js): copy the `en` block,
+  translate the values and add the language to `LANGS`.
 - macOS and Linux builds (the code is cross-platform Electron; only the builds are missing)
 - Testing with other firmware versions
 

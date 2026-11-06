@@ -12,10 +12,11 @@ function camPref(id) {
 }
 function setCamPref(id, on) { try { localStorage.setItem('cam:' + id, on ? '1' : '0'); } catch {} }
 
-const STATE_TR = {
-  printing: 'Yazdırıyor', paused: 'Duraklatıldı', complete: 'Tamamlandı', cancelled: 'İptal edildi',
-  error: 'Hata', standby: 'Hazır', offline: 'Çevrimdışı',
-};
+// Dil: config.language ('auto' veya kod) → I18N (renderer/i18n.js)
+let L = I18N.make('en');
+const t = (k, v) => L.t(k, v);
+const stateName = (st) => t('state.' + st);
+const pctText = (n) => t('pct', { n });
 const STATE_COLOR = {
   printing: '#3fb950', paused: '#f0a500', complete: '#58a6ff', cancelled: '#a5b4c3',
   error: '#f85149', standby: '#a5b4c3', offline: '#6e7681',
@@ -49,23 +50,16 @@ function etaSeconds(s) {
   }
   return byFile ?? bySlicer;
 }
-function fmtDur(sec) {
-  if (sec == null || !isFinite(sec)) return '—';
-  sec = Math.max(0, Math.round(sec));
-  const h = Math.floor(sec / 3600), m = Math.floor((sec % 3600) / 60), s = sec % 60;
-  if (h > 0) return `${h}sa ${String(m).padStart(2, '0')}dk`;
-  if (m > 0) return `${m}dk ${String(s).padStart(2, '0')}sn`;
-  return `${s}sn`;
-}
+const fmtDur = (sec) => L.fmtDur(sec);
 function fmtClock(sec) {
   if (sec == null) return '—';
   const d = new Date(Date.now() + sec * 1000);
   const today = new Date();
-  const t = d.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
+  const t = d.toLocaleTimeString(L.locale, { hour: '2-digit', minute: '2-digit' });
   if (d.toDateString() === today.toDateString()) return t;
   const tomorrow = new Date(today); tomorrow.setDate(today.getDate() + 1);
-  if (d.toDateString() === tomorrow.toDateString()) return 'Yarın ' + t;
-  return d.toLocaleDateString('tr-TR', { day: '2-digit', month: 'short' }) + ' ' + t;
+  if (d.toDateString() === tomorrow.toDateString()) return L.t('tomorrow', { t });
+  return d.toLocaleDateString(L.locale, { day: '2-digit', month: 'short' }) + ' ' + t;
 }
 const t0 = (v) => (v == null ? '—' : Math.round(v));
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -85,7 +79,7 @@ async function act(id, action, value, okMsg) {
     if (okMsg) toast(okMsg);
     return r;
   } catch (e) {
-    toast('Hata: ' + (e.message || e).replace(/^Error invoking remote method '[^']+': (Error: )?/, ''), true);
+    toast(t('error.prefix', { msg: (e.message || e).replace(/^Error invoking remote method '[^']+': (Error: )?/, '') }), true);
     throw e;
   }
 }
@@ -118,8 +112,8 @@ function buildCard(p) {
         <div class="host">${esc(p.host)}</div>
       </div>
       <span class="badge" data-f="badge">—</span>
-      <button class="btn ghost small" data-a="files" title="Dosyalar ve geçmiş">📁 Dosyalar</button>
-      <button class="btn ghost small" data-a="web" title="Yazıcının web arayüzü">🌐 Web</button>
+      <button class="btn ghost small" data-a="files" title="${t('tip.files')}">${t('btn.files')}</button>
+      <button class="btn ghost small" data-a="web" title="${t('tip.web')}">${t('btn.web')}</button>
     </div>
     <div data-f="online">
       <div class="card-body">
@@ -127,10 +121,10 @@ function buildCard(p) {
           <div class="cam" data-f="cam">
             <img class="thumb" data-f="thumb" alt="" hidden />
             <img class="stream" data-f="stream" alt="" hidden />
-            <span class="cam-msg" data-f="cammsg">Kamera kapalı</span>
+            <span class="cam-msg" data-f="cammsg">${t('cam.off')}</span>
             <div class="cam-tools">
-              <button class="btn small" data-a="cam" title="Canlı kamerayı aç/kapat">📷</button>
-              <button class="btn small" data-a="full" title="Tam ekran">⛶</button>
+              <button class="btn small" data-a="cam" title="${t('tip.cam')}">📷</button>
+              <button class="btn small" data-a="full" title="${t('tip.full')}">⛶</button>
             </div>
           </div>
         </div>
@@ -145,57 +139,57 @@ function buildCard(p) {
               <div class="pct"><b data-f="pct">0%</b><span data-f="pctsub">—</span></div>
             </div>
             <div class="file">
-              <div class="fname" data-f="fname">Baskı yok</div>
+              <div class="fname" data-f="fname">${t('job.none')}</div>
               <div class="fsub" data-f="fsub"></div>
               <div class="bar"><i data-f="bar"></i></div>
             </div>
           </div>
           <div class="stats">
-            <div class="stat"><div class="k">Kalan</div><div class="v" data-f="remain">—</div></div>
-            <div class="stat"><div class="k">Bitiş</div><div class="v" data-f="eta">—</div></div>
-            <div class="stat"><div class="k">Geçen</div><div class="v" data-f="elapsed">—</div></div>
-            <div class="stat"><div class="k">Katman</div><div class="v" data-f="layer">—</div></div>
-            <div class="stat"><div class="k">Filament</div><div class="v" data-f="fil">—</div></div>
-            <div class="stat"><div class="k">Hız</div><div class="v" data-f="speedv">—</div></div>
+            <div class="stat"><div class="k">${t('stat.remain')}</div><div class="v" data-f="remain">—</div></div>
+            <div class="stat"><div class="k">${t('stat.eta')}</div><div class="v" data-f="eta">—</div></div>
+            <div class="stat"><div class="k">${t('stat.elapsed')}</div><div class="v" data-f="elapsed">—</div></div>
+            <div class="stat"><div class="k">${t('stat.layer')}</div><div class="v" data-f="layer">—</div></div>
+            <div class="stat"><div class="k">${t('stat.fil')}</div><div class="v" data-f="fil">—</div></div>
+            <div class="stat"><div class="k">${t('stat.speed')}</div><div class="v" data-f="speedv">—</div></div>
           </div>
         </div>
       </div>
       <div style="padding: 0 16px">
-        <div class="section-title"><span>Takım kafaları</span><span data-f="headinfo"></span></div>
+        <div class="section-title"><span>${t('sec.heads')}</span><span data-f="headinfo"></span></div>
         <div class="heads" data-f="heads"></div>
-        <div class="section-title"><span>Filament</span><span data-f="filinfo"></span></div>
+        <div class="section-title"><span>${t('sec.fil')}</span><span data-f="filinfo"></span></div>
         <div class="fils" data-f="fils"></div>
         <div class="fil-actions">
-          <button class="btn small" data-a="unloadsel" title="Seçili kafalardaki filamenti çıkar">⏏ Seçilenleri çıkar</button>
-          <button class="btn small" data-a="unloadall" title="Tüm kafalardaki filamenti çıkar">⏏ Tümünü çıkar</button>
+          <button class="btn small" data-a="unloadsel" title="${t('fil.unloadSelTip')}">${t('fil.unloadSel')}</button>
+          <button class="btn small" data-a="unloadall" title="${t('fil.unloadAllTip')}">${t('fil.unloadAll')}</button>
         </div>
-        <div class="section-title"><span>Ortam</span><span data-f="sys"></span></div>
+        <div class="section-title"><span>${t('sec.env')}</span><span data-f="sys"></span></div>
         <div class="temps">
-          <div class="temp" data-a="bed" title="Tabla hedef sıcaklığı ayarla"><div class="k">🔥 Tabla</div><div class="v" data-f="bed">—</div></div>
-          <div class="temp"><div class="k">🌡 Kabin</div><div class="v" data-f="cavity">—</div></div>
-          <div class="temp"><div class="k">🌀 Parça fanı</div><div class="v" data-f="fanv">—</div></div>
+          <div class="temp" data-a="bed" title="${t('env.bedTip')}"><div class="k">${t('env.bed')}</div><div class="v" data-f="bed">—</div></div>
+          <div class="temp"><div class="k">${t('env.chamber')}</div><div class="v" data-f="cavity">—</div></div>
+          <div class="temp"><div class="k">${t('env.fan')}</div><div class="v" data-f="fanv">—</div></div>
         </div>
       </div>
-      <div class="section-title" style="padding: 0 16px; margin-top: 16px"><span>Ayarlar</span></div>
+      <div class="section-title" style="padding: 0 16px; margin-top: 16px"><span>${t('sec.adjust')}</span></div>
       <div class="sliders">
-        <div class="slider"><div class="k"><span>Hız</span><b data-f="spd">100%</b></div><input type="range" min="50" max="200" step="5" value="100" data-s="speed"></div>
-        <div class="slider"><div class="k"><span>Akış</span><b data-f="flw">100%</b></div><input type="range" min="75" max="125" step="1" value="100" data-s="flow"></div>
-        <div class="slider"><div class="k"><span>Fan</span><b data-f="fanp">0%</b></div><input type="range" min="0" max="100" step="5" value="0" data-s="fan"></div>
+        <div class="slider"><div class="k"><span>${t('sl.speed')}</span><b data-f="spd">100%</b></div><input type="range" min="50" max="200" step="5" value="100" data-s="speed"></div>
+        <div class="slider"><div class="k"><span>${t('sl.flow')}</span><b data-f="flw">100%</b></div><input type="range" min="75" max="125" step="1" value="100" data-s="flow"></div>
+        <div class="slider"><div class="k"><span>${t('sl.fan')}</span><b data-f="fanp">0%</b></div><input type="range" min="0" max="100" step="5" value="0" data-s="fan"></div>
       </div>
       <div class="controls">
-        <button class="btn warn" data-a="pause">⏸ Duraklat</button>
-        <button class="btn good" data-a="resume">▶ Devam</button>
-        <button class="btn danger" data-a="cancel">✖ İptal</button>
-        <button class="btn" data-a="light">💡 Işık</button>
-        <button class="btn" data-a="cooldown">❄ Soğut</button>
+        <button class="btn warn" data-a="pause">${t('ctl.pause')}</button>
+        <button class="btn good" data-a="resume">${t('ctl.resume')}</button>
+        <button class="btn danger" data-a="cancel">${t('ctl.cancel')}</button>
+        <button class="btn" data-a="light">${t('ctl.light')}</button>
+        <button class="btn" data-a="cooldown">${t('ctl.cool')}</button>
         <span class="spacer"></span>
-        <button class="btn danger" data-a="estop" title="Acil durdurma">⛔ ACİL STOP</button>
+        <button class="btn danger" data-a="estop" title="${t('ctl.estopTip')}">${t('ctl.estop')}</button>
       </div>
     </div>
     <div class="offline-box" data-f="offline" hidden>
-      <b>Yazıcıya ulaşılamıyor</b>
+      <b>${t('off.title')}</b>
       <span data-f="offmsg"></span>
-      <div style="margin-top: 14px"><button class="btn small" data-a="frestart">↻ Firmware yeniden başlat</button></div>
+      <div style="margin-top: 14px"><button class="btn small" data-a="frestart">${t('off.restart')}</button></div>
     </div>`;
 
   // ---- olaylar ----
@@ -209,14 +203,14 @@ function buildCard(p) {
     if (a === 'files') return openFiles(p);
     if (a === 'cam') { camOn[p.id] = !camOn[p.id]; setCamPref(p.id, camOn[p.id]); return updateCam(p, el, s); }
     if (a === 'full') { f('cam').classList.toggle('fullscreen'); return; }
-    if (a === 'pause') return act(p.id, 'pause', null, 'Duraklatılıyor…');
-    if (a === 'resume') return act(p.id, 'resume', null, 'Devam ediliyor…');
+    if (a === 'pause') return act(p.id, 'pause', null, t('toast.pausing'));
+    if (a === 'resume') return act(p.id, 'resume', null, t('toast.resuming'));
     if (a === 'cancel') {
-      if (await confirmBox('Baskı iptal edilsin mi?', `${p.name}: ${cleanName(s?.status?.print_stats?.filename)}`)) act(p.id, 'cancel', null, 'İptal ediliyor…');
+      if (await confirmBox(t('cf.cancelTitle'), `${p.name}: ${cleanName(s?.status?.print_stats?.filename)}`)) act(p.id, 'cancel', null, t('toast.cancelling'));
       return;
     }
     if (a === 'estop') {
-      if (await confirmBox('ACİL DURDURMA', `${p.name} hemen durdurulacak. Firmware yeniden başlatma gerekecek.`)) act(p.id, 'estop', null, 'Acil stop gönderildi');
+      if (await confirmBox(t('cf.estopTitle'), t('cf.estopText', { name: p.name }))) act(p.id, 'estop', null, t('toast.estop'));
       return;
     }
     if (a === 'unload' || a === 'unloadall' || a === 'unloadsel') {
@@ -224,16 +218,15 @@ function buildCard(p) {
       if (a === 'unload') list = [Number(b.dataset.i)];
       else if (a === 'unloadall') list = [0, 1, 2, 3].filter((i) => filLoaded(s, i) !== false);
       else list = $$('.fil input[type=checkbox]:checked', el).map((c) => Number(c.dataset.i));
-      if (!list.length) return toast(a === 'unloadsel' ? 'Önce kafa seçin' : 'Çıkarılacak filament yok', true);
+      if (!list.length) return toast(a === 'unloadsel' ? t('fil.selectFirst') : t('fil.nothing'), true);
       const names = list.map((i) => `T${i} (${filName(s, i)})`).join(', ');
-      if (!(await confirmBox('Filament çıkarılsın mı?',
-        `${p.name}: ${names}\n\nYazıcı kafayı ısıtıp filamenti geri sarar. İşlem kafa başına 1-2 dakika sürebilir.`))) return;
+      if (!(await confirmBox(t('fil.confirmTitle'), t('fil.confirmText', { name: p.name, list: names })))) return;
       unloading[p.id] = new Set(list);
       updateCard(p, el, states[p.id]);
-      toast(`Filament çıkarma başladı: ${list.map((i) => 'T' + i).join(', ')}`);
+      toast(t('fil.started', { list: list.map((i) => 'T' + i).join(', ') }));
       try {
         await act(p.id, 'unload', list);
-        toast(`✓ ${p.name}: filament çıkarıldı`);
+        toast(t('fil.doneToast', { name: p.name }));
         $$('.fil input[type=checkbox]', el).forEach((c) => (c.checked = false));
       } catch {} finally {
         delete unloading[p.id];
@@ -241,23 +234,23 @@ function buildCard(p) {
       }
       return;
     }
-    if (a === 'frestart') return act(p.id, 'firmware_restart', null, 'Firmware yeniden başlatılıyor…');
+    if (a === 'frestart') return act(p.id, 'firmware_restart', null, t('toast.restarting'));
     if (a === 'light') {
       const on = isLightOn(s);
-      return act(p.id, 'light', !on, on ? 'Işık kapatıldı' : 'Işık açıldı');
+      return act(p.id, 'light', !on, on ? t('toast.lightOff') : t('toast.lightOn'));
     }
     if (a === 'cooldown') {
-      if (await confirmBox('Isıtıcılar kapatılsın mı?', 'Tüm kafa ve tabla ısıtıcıları kapatılacak.')) act(p.id, 'cooldown', null, 'Isıtıcılar kapatıldı');
+      if (await confirmBox(t('cf.coolTitle'), t('cf.coolText'))) act(p.id, 'cooldown', null, t('toast.heatersOff'));
       return;
     }
     if (a === 'bed') {
-      const v = await prompt2('Tabla hedef sıcaklığı (°C)', s?.status?.heater_bed?.target ?? 0);
-      if (v != null) act(p.id, 'bed', v, `Tabla → ${v}°C`);
+      const v = await prompt2(t('pr.bed'), s?.status?.heater_bed?.target ?? 0);
+      if (v != null) act(p.id, 'bed', v, `${t('env.bed')} → ${v}°C`);
       return;
     }
     if (a === 'head') {
       const heater = b.dataset.h;
-      const v = await prompt2(`T${b.dataset.i} hedef sıcaklığı (°C)`, s?.status?.[heater]?.target ?? 0);
+      const v = await prompt2(t('pr.head', { i: b.dataset.i }), s?.status?.[heater]?.target ?? 0);
       if (v != null) act(p.id, 'nozzle', { heater, target: v }, `T${b.dataset.i} → ${v}°C`);
     }
   });
@@ -266,7 +259,7 @@ function buildCard(p) {
     const label = { speed: 'spd', flow: 'flw', fan: 'fanp' }[r.dataset.s];
     r.addEventListener('input', () => { r._dragging = true; f(label).textContent = r.value + '%'; });
     r.addEventListener('change', async () => {
-      try { await act(p.id, r.dataset.s, +r.value, `${{ speed: 'Hız', flow: 'Akış', fan: 'Fan' }[r.dataset.s]} → %${r.value}`); }
+      try { await act(p.id, r.dataset.s, +r.value, `${t('sl.' + r.dataset.s)} → ${pctText(r.value)}`); }
       finally { setTimeout(() => (r._dragging = false), 2500); }
     });
   });
@@ -281,7 +274,7 @@ function prompt2(label, def) {
     const d = document.createElement('dialog');
     d.innerHTML = `<form method="dialog" class="dlg small"><h2>${esc(label)}</h2>
       <input class="input" type="number" min="0" max="350" value="${esc(def)}" autofocus />
-      <div class="dlg-actions"><button class="btn ghost" value="no">Vazgeç</button><button class="btn primary" value="yes">Ayarla</button></div></form>`;
+      <div class="dlg-actions"><button class="btn ghost" value="no">${t('cancel')}</button><button class="btn primary" value="yes">${t('pr.set')}</button></div></form>`;
     document.body.appendChild(d);
     d.showModal();
     d.addEventListener('close', () => {
@@ -294,10 +287,11 @@ function prompt2(label, def) {
 
 const unloading = {}; // id -> Set(kafa index) — işlem sürerken
 const FEED_MAP = [['left', 'extruder0'], ['left', 'extruder1'], ['right', 'extruder2'], ['right', 'extruder3']];
-const CH_TR = {
-  load_finish: 'Yüklü', loading: 'Yükleniyor…', unloading: 'Çıkarılıyor…', unload_finish: 'Çıkarıldı',
-  idle: 'Boş', none: 'Boş', preload: 'Ön yükleme', preload_finish: 'Beslemede hazır', runout: 'Bitti!',
+const CH_KEY = {
+  load_finish: 'loaded', loading: 'loading', unloading: 'unloading', unload_finish: 'unloaded',
+  idle: 'empty', none: 'empty', preload: 'preload', preload_finish: 'preloaded', runout: 'runout',
 };
+const chText = (state) => (CH_KEY[state] ? t('fil.st.' + CH_KEY[state]) : null);
 function feedCh(s, i) {
   const [mod, key] = FEED_MAP[i];
   return s?.status?.['filament_feed ' + mod]?.[key];
@@ -326,11 +320,11 @@ function camStart(p, el) {
   const c = camCtl[p.id] || (camCtl[p.id] = {});
   if (c.frameTimer) return;
   const f = (n) => $(`[data-f="${n}"]`, el);
-  f('cammsg').textContent = 'Kamera uyandırılıyor…';
+  f('cammsg').textContent = t('cam.waking');
   const wake = async () => {
     c.lastWake = Date.now();
     const r = await window.farm.wakeCamera(p.id);
-    if (!r.ok && !c.gotFrame) f('cammsg').textContent = 'Kamera başlatılamadı: ' + (r.info?.message || r.info || '');
+    if (!r.ok && !c.gotFrame) f('cammsg').textContent = t('cam.failed', { msg: r.info?.message || r.info || '' });
   };
   wake();
   c.wakeTimer = setInterval(wake, CAM_WAKE_MS);
@@ -347,12 +341,12 @@ function camStart(p, el) {
       st.src = url; // önbellekte, titreme olmaz
       st.hidden = false;
       f('thumb').hidden = true;
-      f('cammsg').innerHTML = '<span class="live">●</span> CANLI · ' + new Date().toLocaleTimeString('tr-TR');
+      f('cammsg').innerHTML = `<span class="live">●</span> ${t('cam.live')} · ` + new Date().toLocaleTimeString(L.locale);
     };
     img.onerror = () => {
       c.busy = false; c.fails++;
       if (c.fails >= 3) {
-        f('cammsg').textContent = 'Kamera bekleniyor…';
+        f('cammsg').textContent = t('cam.waiting');
         if (Date.now() - (c.lastWake || 0) > 3000) wake();
         c.fails = 0;
       }
@@ -366,7 +360,7 @@ function camStop(p, el) {
   const f = (n) => $(`[data-f="${n}"]`, el);
   f('stream').removeAttribute('src');
   f('stream').hidden = true;
-  f('cammsg').textContent = 'Kamera kapalı';
+  f('cammsg').textContent = t('cam.off');
 }
 
 function updateCam(p, el, s) {
@@ -398,7 +392,7 @@ function updateCard(p, el, s) {
   el.dataset.state = st;
   f('dot').className = 'dot ' + st;
   f('badge').className = 'badge ' + st;
-  f('badge').textContent = STATE_TR[st] || st;
+  f('badge').textContent = stateName(st);
 
   const offline = st === 'offline' || (st === 'error' && !s?.status);
   f('online').hidden = offline;
@@ -406,8 +400,8 @@ function updateCard(p, el, s) {
   if (offline) {
     if (camCtl[p.id]) camStop(p, el);
     f('offmsg').textContent = st === 'offline'
-      ? `${p.host} yanıt vermiyor. Yazıcının açık ve ağa bağlı olduğundan emin olun.`
-      : `Klipper durumu: ${s?.klippy}. ${s?.error || ''}`;
+      ? t('off.msg', { host: p.host })
+      : t('off.klippy', { s: s?.klippy, e: s?.error || '' });
     return;
   }
 
@@ -420,25 +414,25 @@ function updateCard(p, el, s) {
 
   // ilerleme
   f('pct').textContent = hasJob ? pct + '%' : '—';
-  f('pctsub').textContent = STATE_TR[st] || st;
+  f('pctsub').textContent = stateName(st);
   f('arc').setAttribute('stroke-dashoffset', String(339.3 * (1 - (hasJob ? prog : 0))));
   f('arc').setAttribute('stroke', STATE_COLOR[st] || '#ff7a18');
   f('bar').style.width = (hasJob ? prog * 100 : 0) + '%';
-  f('fname').textContent = hasJob ? cleanName(ps.filename) : 'Baskı yok';
+  f('fname').textContent = hasJob ? cleanName(ps.filename) : t('job.none');
   const meta = s.meta;
   const subs = [];
   if (hasJob && meta) {
     if (meta.slicer) subs.push(`${meta.slicer} ${meta.slicer_version || ''}`.trim());
-    if (meta.layer_height) subs.push(`${meta.layer_height} mm katman`);
+    if (meta.layer_height) subs.push(t('job.layer', { h: meta.layer_height }));
     if (meta.filament_weight_total) subs.push(`${meta.filament_weight_total.toFixed(0)} g`);
-    if (meta.estimated_time) subs.push(`Tahmini ${fmtDur(meta.estimated_time)}`);
+    if (meta.estimated_time) subs.push(t('job.est', { d: fmtDur(meta.estimated_time) }));
   }
   if (ps.message) subs.push('⚠ ' + ps.message);
-  if (!hasJob && st === 'standby') subs.push('Yazıcı boşta, yeni iş için hazır');
+  if (!hasJob && st === 'standby') subs.push(t('job.idle'));
   f('fsub').textContent = subs.join(' · ');
 
   const eta = active ? etaSeconds(s) : null;
-  f('remain').textContent = active ? fmtDur(eta) : (st === 'complete' ? 'Bitti ✓' : '—');
+  f('remain').textContent = active ? fmtDur(eta) : (st === 'complete' ? t('done') : '—');
   f('eta').textContent = active ? fmtClock(eta) : '—';
   f('elapsed').textContent = hasJob ? fmtDur(ps.total_duration) : '—';
   const L = ps.info || {};
@@ -454,7 +448,7 @@ function updateCard(p, el, s) {
   const headsEl = f('heads');
   if (!headsEl.children.length) {
     headsEl.innerHTML = heads.map((h, i) => `
-      <div class="head" data-a="head" data-h="${h}" data-i="${i}" title="T${i} sıcaklığını ayarla">
+      <div class="head" data-a="head" data-h="${h}" data-i="${i}" data-badge="${t('head.badge')}" title="${t('head.tip', { i })}">
         <div class="spool"><span class="sw"></span><span class="tn">T${i}</span></div>
         <div class="ft"></div>
         <div class="tt"></div>
@@ -467,11 +461,11 @@ function updateCard(p, el, s) {
     he.classList.toggle('active', active && activeExt === h);
     $('.sw', he).style.background = argbToCss(ptc.filament_color_rgba?.[i]);
     const exist = ptc.filament_exist?.[i];
-    $('.ft', he).textContent = exist === false ? 'Filament yok' : `${ptc.filament_vendor?.[i] || ''} ${ptc.filament_type?.[i] || ''}${ptc.filament_sub_type?.[i] ? ' ' + ptc.filament_sub_type[i] : ''}`.trim();
+    $('.ft', he).textContent = exist === false ? t('fil.none') : `${ptc.filament_vendor?.[i] || ''} ${ptc.filament_type?.[i] || ''}${ptc.filament_sub_type?.[i] ? ' ' + ptc.filament_sub_type[i] : ''}`.trim();
     $('.tt', he).innerHTML = `${t0(e.temperature)}°<small> / ${t0(e.target)}°</small>`;
     $('.heat i', he).style.width = Math.round((e.power || 0) * 100) + '%';
   });
-  f('headinfo').textContent = activeExt ? `Aktif: T${heads.indexOf(activeExt)}` : '';
+  f('headinfo').textContent = activeExt ? t('head.active', { i: heads.indexOf(activeExt) }) : '';
 
   // filament
   const filsEl = f('fils');
@@ -482,7 +476,7 @@ function updateCard(p, el, s) {
         <span class="sw"></span>
         <div class="fil-name"><b>T${i}</b> <span class="fn"></span></div>
         <div class="fil-state"><span class="dot"></span><span class="fs"></span></div>
-        <button class="btn small" data-a="unload" data-i="${i}">⏏ Çıkar</button>
+        <button class="btn small" data-a="unload" data-i="${i}">${t('fil.unload')}</button>
       </div>`).join('');
   }
   const busySet = unloading[p.id];
@@ -492,30 +486,30 @@ function updateCard(p, el, s) {
     const loaded = filLoaded(s, i);
     $('.sw', row).style.background = loaded === false ? 'transparent' : argbToCss(ptc.filament_color_rgba?.[i]);
     $('.sw', row).style.borderStyle = loaded === false ? 'dashed' : 'solid';
-    $('.fn', row).textContent = loaded === false ? 'Filament yok' : filName(s, i);
+    $('.fn', row).textContent = loaded === false ? t('fil.none') : filName(s, i);
     let txt, cls;
-    if (busySet?.has(i)) { txt = 'Çıkarılıyor…'; cls = 'paused'; }
-    else if (ch?.channel_error && ch.channel_error !== 'ok') { txt = 'Hata: ' + ch.channel_error; cls = 'error'; }
-    else if (loaded === false) { txt = 'Boş'; cls = 'offline'; }
-    else { txt = CH_TR[ch?.channel_state] || (ch?.channel_state ? ch.channel_state.replace(/_/g, ' ') : (loaded ? 'Yüklü' : '?')); cls = loaded ? 'printing' : 'standby'; }
+    if (busySet?.has(i)) { txt = t('fil.st.unloading'); cls = 'paused'; }
+    else if (ch?.channel_error && ch.channel_error !== 'ok') { txt = t('fil.st.error', { e: ch.channel_error }); cls = 'error'; }
+    else if (loaded === false) { txt = t('fil.st.empty'); cls = 'offline'; }
+    else { txt = chText(ch?.channel_state) || (ch?.channel_state ? ch.channel_state.replace(/_/g, ' ') : (loaded ? t('fil.st.loaded') : '?')); cls = loaded ? 'printing' : 'standby'; }
     $('.fs', row).textContent = txt;
     $('.dot', row).className = 'dot ' + cls;
     $('[data-a="unload"]', row).disabled = active || !!busySet || loaded === false;
     $('input', row).disabled = active || !!busySet || loaded === false;
   });
   const loadedCount = [0, 1, 2, 3].filter((i) => filLoaded(s, i) !== false).length;
-  f('filinfo').textContent = busySet ? 'İşlem sürüyor…' : active ? 'Baskı sırasında kilitli' : `${loadedCount}/4 yüklü`;
+  f('filinfo').textContent = busySet ? t('fil.busy') : active ? t('fil.locked') : t('fil.loadedCount', { n: loadedCount });
   $('[data-a="unloadall"]', el).disabled = active || !!busySet || !loadedCount;
   $('[data-a="unloadsel"]', el).disabled = active || !!busySet;
 
   const bed = S.heater_bed || {};
   f('bed').innerHTML = `${t0(bed.temperature)}°<small> / ${t0(bed.target)}°</small>`;
   const cav = S['temperature_sensor cavity'];
-  f('cavity').innerHTML = cav ? `${t0(cav.temperature)}°<small> (maks ${t0(cav.measured_max_temp)}°)</small>` : '—';
+  f('cavity').innerHTML = cav ? `${t0(cav.temperature)}°<small> ${t('env.max', { t: t0(cav.measured_max_temp) })}</small>` : '—';
   const fanPct = Math.round((S.fan?.speed || 0) * 100);
-  f('fanv').textContent = `%${fanPct}`;
+  f('fanv').textContent = pctText(fanPct);
   const sys = S.system_stats;
-  f('sys').textContent = sys ? `CPU ${Math.round((sys.sysload || 0) * 100) / 100} yük · ${Math.round((sys.memavail || 0) / 1024)} MB boş` : '';
+  f('sys').textContent = sys ? t('sys.info', { l: Math.round((sys.sysload || 0) * 100) / 100, m: Math.round((sys.memavail || 0) / 1024) }) : '';
 
   // sürgüler (kullanıcı oynamıyorsa senkronla)
   const gm = S.gcode_move || {};
@@ -545,15 +539,15 @@ function updateSummary() {
     const s = states[p.id];
     const st = stateOf(s);
     counts[st] = (counts[st] || 0) + 1;
-    const pct = (st === 'printing' || st === 'paused') ? ` <b>%${Math.floor(progressOf(s) * 100)}</b>` : '';
+    const pct = (st === 'printing' || st === 'paused') ? ` <b>${pctText(Math.floor(progressOf(s) * 100))}</b>` : '';
     const eta = st === 'printing' ? ` · ${fmtDur(etaSeconds(s))}` : '';
     html += `<span class="chip"><span class="dot ${st}"></span>${esc(p.name)}${pct}<span>${eta}</span></span>`;
   }
   const printing = counts.printing || 0;
-  html += `<span class="chip">Aktif <b>${printing}/${config.printers.length}</b></span>`;
+  html += `<span class="chip">${t('active')} <b>${printing}/${config.printers.length}</b></span>`;
   $('#summary').innerHTML = html;
   document.title = printing
-    ? 'U1 Farm — ' + config.printers.filter((p) => stateOf(states[p.id]) === 'printing').map((p) => `%${Math.floor(progressOf(states[p.id]) * 100)}`).join(' · ')
+    ? 'U1 Farm — ' + config.printers.filter((p) => stateOf(states[p.id]) === 'printing').map((p) => pctText(Math.floor(progressOf(states[p.id]) * 100))).join(' · ')
     : 'U1 Farm Control';
 }
 
@@ -630,7 +624,7 @@ function updateTrayIcons() {
 let filesCtx = null;
 async function openFiles(p) {
   filesCtx = { p, tab: 'files', data: null };
-  $('#filesTitle').textContent = `${p.name} — Dosyalar`;
+  $('#filesTitle').textContent = t('files.title', { name: p.name });
   $('#fileSearch').value = '';
   $$('#files .tab').forEach((t) => t.classList.toggle('active', t.dataset.tab === 'files'));
   $('#files').showModal();
@@ -639,7 +633,7 @@ async function openFiles(p) {
 async function loadFilesTab() {
   const { p, tab } = filesCtx;
   const list = $('#filesList');
-  list.innerHTML = '<div class="offline-box">Yükleniyor…</div>';
+  list.innerHTML = `<div class="offline-box">${t('files.loading')}</div>`;
   try {
     if (tab === 'files') {
       const r = await act(p.id, 'files');
@@ -650,7 +644,7 @@ async function loadFilesTab() {
     }
     renderFiles();
   } catch {
-    list.innerHTML = '<div class="offline-box">Liste alınamadı</div>';
+    list.innerHTML = `<div class="offline-box">${t('files.failed')}</div>`;
   }
 }
 function renderFiles() {
@@ -666,25 +660,25 @@ function renderFiles() {
       const name = x.path.slice(dir.length).replace(/\.gcode$/i, '');
       const th = `http://${p.host}:7125/server/files/gcodes/${encodeURI(dir + '.thumbs/' + name + '-48x48.png')}`;
       return `<div class="frow"><img src="${th}" onerror="this.style.visibility='hidden'" />
-        <div class="fi"><b title="${esc(x.path)}">${esc(base)}</b><span>${new Date(x.modified * 1000).toLocaleString('tr-TR')} · ${(x.size / 1048576).toFixed(1)} MB</span></div>
-        <button class="btn small primary" data-print="${esc(x.path)}" ${busy ? 'disabled title="Yazıcı meşgul"' : ''}>▶ Yazdır</button></div>`;
-    }).join('') || '<div class="offline-box">Dosya yok</div>';
+        <div class="fi"><b title="${esc(x.path)}">${esc(base)}</b><span>${new Date(x.modified * 1000).toLocaleString(L.locale)} · ${(x.size / 1048576).toFixed(1)} MB</span></div>
+        <button class="btn small primary" data-print="${esc(x.path)}" ${busy ? `disabled title="${t('files.busy')}"` : ''}>${t('files.print')}</button></div>`;
+    }).join('') || `<div class="offline-box">${t('files.empty')}</div>`;
   } else {
     const rows = data.filter((x) => (x.filename || '').toLowerCase().includes(q));
     const ic = { completed: '✅', cancelled: '✖', error: '⛔', in_progress: '▶', klippy_shutdown: '⚠', server_exit: '⚠' };
     list.innerHTML = rows.map((j) => `<div class="frow">
         <div style="font-size:22px;width:48px;text-align:center">${ic[j.status] || '•'}</div>
         <div class="fi"><b>${esc(cleanName(j.filename))}</b>
-        <span>${new Date(j.start_time * 1000).toLocaleString('tr-TR')} · ${fmtDur(j.print_duration)} · ${((j.filament_used || 0) / 1000).toFixed(2)} m · ${esc(j.status)}</span></div></div>`).join('')
-      || '<div class="offline-box">Geçmiş boş</div>';
+        <span>${new Date(j.start_time * 1000).toLocaleString(L.locale)} · ${fmtDur(j.print_duration)} · ${((j.filament_used || 0) / 1000).toFixed(2)} m · ${esc(j.status)}</span></div></div>`).join('')
+      || `<div class="offline-box">${t('files.histEmpty')}</div>`;
   }
 }
 $('#filesList').addEventListener('click', async (e) => {
   const b = e.target.closest('[data-print]');
   if (!b) return;
   const fn = b.dataset.print;
-  if (await confirmBox('Baskı başlatılsın mı?', `${filesCtx.p.name}: ${cleanName(fn)}\n\nTablanın boş olduğundan emin olun.`)) {
-    await act(filesCtx.p.id, 'start', fn, 'Baskı başlatıldı');
+  if (await confirmBox(t('cf.printTitle'), t('cf.printText', { name: filesCtx.p.name, file: cleanName(fn) }))) {
+    await act(filesCtx.p.id, 'start', fn, t('toast.printStarted'));
     $('#files').close();
   }
 });
@@ -701,9 +695,9 @@ function printerRow(p) {
   const d = document.createElement('div');
   d.className = 'prow';
   d.dataset.id = p.id;
-  d.innerHTML = `<input class="input" data-k="name" placeholder="Ad" value="${esc(p.name)}" />
-    <input class="input" data-k="host" placeholder="IP adresi" value="${esc(p.host)}" />
-    <button type="button" class="btn ghost small" title="Kaldır">✕</button>`;
+  d.innerHTML = `<input class="input" data-k="name" placeholder="${t('set.name')}" value="${esc(p.name)}" />
+    <input class="input" data-k="host" placeholder="${t('set.ip')}" value="${esc(p.host)}" />
+    <button type="button" class="btn ghost small" title="${t('set.remove')}">✕</button>`;
   $('button', d).onclick = () => d.remove();
   return d;
 }
@@ -715,6 +709,7 @@ $('#btnSettings').addEventListener('click', async () => {
   $('#optNotif').checked = config.notifications;
   $('#optStartMin').checked = config.startMinimized;
   $('#optAutostart').checked = await window.farm.getAutostart();
+  $('#optLang').value = config.language || 'auto';
   $('#settings').showModal();
 });
 $('#addPrinter').addEventListener('click', () => {
@@ -723,19 +718,36 @@ $('#addPrinter').addEventListener('click', () => {
 $('#settings').addEventListener('close', async () => {
   if ($('#settings').returnValue !== 'ok') return;
   const printers = $$('#printerRows .prow').map((r) => ({
-    id: r.dataset.id, name: $('[data-k=name]', r).value.trim() || 'Yazıcı', host: $('[data-k=host]', r).value.trim(),
+    id: r.dataset.id, name: $('[data-k=name]', r).value.trim() || t('set.defaultName'), host: $('[data-k=host]', r).value.trim(),
   })).filter((p) => p.host);
   config = await window.farm.setConfig({
     printers,
     trayPerPrinter: $('#optTrayPer').checked,
     notifications: $('#optNotif').checked,
     startMinimized: $('#optStartMin').checked,
+    language: $('#optLang').value,
   });
   await window.farm.setAutostart($('#optAutostart').checked);
+  if (I18N.resolve(config.language, navigator.language) !== L.lang) {
+    location.reload(); // dil değişti: arayüzü yeni dille baştan kur
+    return;
+  }
   rebuild();
   lastTrayKey = '';
-  toast('Ayarlar kaydedildi');
+  toast(t('toast.saved'));
 });
+
+// ---------------- sabit metinler (index.html) ----------------
+function applyStaticTexts() {
+  document.documentElement.lang = L.lang;
+  $$('[data-i18n]').forEach((e) => (e.textContent = t(e.dataset.i18n)));
+  $$('[data-i18n-html]').forEach((e) => (e.innerHTML = t(e.dataset.i18nHtml)));
+  $$('[data-i18n-title]').forEach((e) => (e.title = t(e.dataset.i18nTitle)));
+  $$('[data-i18n-ph]').forEach((e) => (e.placeholder = t(e.dataset.i18nPh)));
+  const sel = $('#optLang');
+  sel.innerHTML = `<option value="auto">${t('set.auto')}</option>` +
+    Object.entries(I18N.LANGS).map(([k, v]) => `<option value="${k}">${esc(v.name)}</option>`).join('');
+}
 
 // ---------------- ana döngü ----------------
 function rebuild() {
@@ -766,6 +778,8 @@ function render() {
 
 (async () => {
   config = await window.farm.getConfig();
+  L = I18N.make(I18N.resolve(config.language, navigator.language));
+  applyStaticTexts();
   rebuild();
   $('#emptyAdd').addEventListener('click', () => $('#btnSettings').click());
   if (!config.printers.length) {

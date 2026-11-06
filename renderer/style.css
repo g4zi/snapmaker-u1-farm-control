@@ -153,7 +153,7 @@ button { font: inherit; }
 }
 .head.active { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent) inset; }
 .head.active::after {
-  content: "AKTİF"; position: absolute; top: -8px; right: 6px; font-size: 9px; font-weight: 700;
+  content: attr(data-badge); position: absolute; top: -8px; right: 6px; font-size: 9px; font-weight: 700;
   background: var(--accent); color: #111; padding: 1px 5px; border-radius: 4px;
 }
 .head .spool { display: flex; align-items: center; gap: 6px; }
@@ -238,3 +238,7 @@ dialog::backdrop { background: rgba(0,0,0,.55); backdrop-filter: blur(3px); }
 .empty img { width: 84px; height: 84px; opacity: .9; }
 .empty h2 { color: var(--text); margin: 16px 0 8px; }
 .empty p { margin: 0 0 20px; }
+
+/* Ayarlar: alan */
+.field { display: grid; grid-template-columns: 120px 1fr; align-items: center; gap: 10px; margin: 0 0 12px; }
+.field select { cursor: pointer; }
