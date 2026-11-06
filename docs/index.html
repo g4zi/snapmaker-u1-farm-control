@@ -3,16 +3,116 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>U1 Farm Control: print farm dashboard for Snapmaker U1</title>
-  <meta name="description" content="Free, open-source Windows dashboard for Snapmaker U1 printers. Live print progress in the system tray, camera, filament unload and print controls for every printer on your network." />
-  <meta property="og:title" content="U1 Farm Control" />
-  <meta property="og:description" content="Watch every Snapmaker U1 in your farm from the Windows taskbar. Free and open source." />
+  <title>Snapmaker U1 Print Farm Monitor for Windows | U1 Farm Control</title>
+  <meta name="description" content="Free Windows app to monitor Snapmaker U1 3D printers: live print progress in the tray, camera, toolheads and remote filament unload for your print farm." />
+  <meta name="keywords" content="Snapmaker U1, Snapmaker U1 monitor, Snapmaker U1 print farm, Snapmaker U1 camera, Snapmaker U1 software, Snapmaker U1 filament unload, Snapmaker toolchanger, 3D printer farm, Klipper, Moonraker, Windows" />
+  <meta name="author" content="Kemal Tarık Arıcıoğlu" />
+  <meta name="robots" content="index, follow" />
+  <meta property="og:site_name" content="U1 Farm Control" />
+  <meta property="og:title" content="U1 Farm Control: Snapmaker U1 print farm monitor for Windows" />
+  <meta property="og:description" content="Watch every Snapmaker U1 in your print farm from the Windows taskbar: live progress, camera, toolheads and filament unload. Free and open source." />
+  <meta property="og:url" content="https://g4zi.github.io/u1-farm-control/" />
   <meta property="og:image" content="https://g4zi.github.io/u1-farm-control/img/og.png" />
+  <meta property="og:image:alt" content="U1 Farm Control dashboard monitoring two Snapmaker U1 printers" />
   <meta property="og:type" content="website" />
   <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="U1 Farm Control: Snapmaker U1 print farm monitor for Windows" />
+  <meta name="twitter:description" content="Live Snapmaker U1 print progress in your Windows tray, plus camera, toolheads and filament unload. Free and open source." />
+  <meta name="twitter:image" content="https://g4zi.github.io/u1-farm-control/img/og.png" />
   <meta name="color-scheme" content="dark" />
   <link rel="icon" href="img/icon.png" />
   <link rel="canonical" href="https://g4zi.github.io/u1-farm-control/" />
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "U1 Farm Control",
+  "alternateName": "U1 Farm Control for Snapmaker U1",
+  "description": "Free, open-source Windows app to monitor and control Snapmaker U1 3D printers: live print progress in the system tray, camera view, toolheads, filament unload and print controls for a whole Snapmaker U1 print farm.",
+  "applicationCategory": "UtilitiesApplication",
+  "operatingSystem": "Windows 10, Windows 11",
+  "softwareVersion": "1.1.0",
+  "url": "https://g4zi.github.io/u1-farm-control/",
+  "downloadUrl": "https://github.com/g4zi/u1-farm-control/releases/latest",
+  "codeRepository": "https://github.com/g4zi/u1-farm-control",
+  "license": "https://opensource.org/licenses/MIT",
+  "image": "https://g4zi.github.io/u1-farm-control/img/og.png",
+  "screenshot": "https://g4zi.github.io/u1-farm-control/img/dashboard.png",
+  "inLanguage": [
+    "en",
+    "tr",
+    "de",
+    "es",
+    "fr"
+  ],
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "author": {
+    "@type": "Person",
+    "name": "Kemal Tarık Arıcıoğlu",
+    "url": "https://github.com/g4zi"
+  }
+}
+  </script>
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Does U1 Farm Control need custom Snapmaker U1 firmware?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "No. It works with the stock Snapmaker U1 firmware (tested with 2.0.0.205). Your PC and printers just need to be on the same local network."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Windows says the app is unrecognized. Is it safe?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The executables aren't code-signed yet, so SmartScreen shows a warning for new downloads. Click More info, then Run anyway. The full source is on GitHub and every release is built by GitHub Actions from that source."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Why is the Snapmaker U1 camera only about 1 frame per second?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "That's the limit of the stock Snapmaker U1 firmware's camera snapshot. The app wakes the camera up and keeps it running while the dashboard is open, and stops when the window is hidden."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How many Snapmaker U1 printers can I monitor?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "As many as you like. Each Snapmaker U1 gets its own card on the dashboard and, optionally, its own tray icon."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Does it work on macOS or Linux?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Only Windows builds are published today. The app is built with Electron, so other platforms are possible. Contributions are welcome."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Is this an official Snapmaker app?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "No. It's a free community project for Snapmaker U1 owners, not affiliated with or endorsed by Snapmaker. Actions like filament unload and emergency stop move your printer; use them at your own risk."
+      }
+    }
+  ]
+}
+  </script>
   <style>
     :root {
       --bg: #0b0f15;
@@ -188,7 +288,7 @@
 <body>
   <nav>
     <div class="wrap">
-      <a class="logo" href="#"><img src="img/icon.png" alt="" /> U1 Farm Control</a>
+      <a class="logo" href="#"><img src="img/icon.png" alt="U1 Farm Control logo" width="30" height="30" /> U1 Farm Control</a>
       <div class="links">
         <a class="opt" href="#features">Features</a>
         <a class="opt" href="#how">How it works</a>
@@ -202,10 +302,11 @@
   <header class="hero">
     <div class="wrap">
       <span class="eyebrow">Free &amp; open source · for Snapmaker U1</span>
-      <h1>Your whole U1 farm, <em>right next to the clock.</em></h1>
+      <h1>Your whole Snapmaker U1 farm, <em>right next to the clock.</em></h1>
       <p class="lead">
-        U1 Farm Control watches every Snapmaker U1 on your network from one Windows dashboard.
-        Minimize it and each printer becomes a tray icon showing its live print percentage.
+        U1 Farm Control is a free Windows app that monitors every Snapmaker U1 3D printer on your
+        network from one dashboard. Minimize it and each Snapmaker U1 becomes a tray icon showing its
+        live print percentage.
       </p>
       <div class="cta">
         <a class="btn primary" href="https://github.com/g4zi/u1-farm-control/releases/latest">
@@ -219,8 +320,8 @@
       </div>
       <div class="meta">Windows 10 / 11 · Installer or portable exe · No account, no cloud</div>
 
-      <div class="taskbar" aria-label="Windows taskbar with U1 Farm Control tray icons">
-        <div class="label">Each printer gets its own<br />icon in the system tray</div>
+      <div class="taskbar" aria-label="Windows taskbar with Snapmaker U1 print progress icons">
+        <div class="label">Each Snapmaker U1 gets its<br />own icon in the system tray</div>
         <div class="tray-tip" id="tip">U1 #1 — Printing 71%
 Remaining: 53m
 cab_x2_PLA</div>
@@ -231,7 +332,7 @@ cab_x2_PLA</div>
 
       <div class="shot">
         <div class="bar"><i></i><i></i><i></i><span>U1 Farm Control</span></div>
-        <img src="img/dashboard.png" alt="U1 Farm Control dashboard showing two Snapmaker U1 printers with live camera, progress, toolheads and filament" width="1440" height="1112" />
+        <img src="img/dashboard.png" alt="U1 Farm Control dashboard monitoring two Snapmaker U1 printers with live camera, print progress, toolheads and filament" width="1440" height="1112" />
       </div>
     </div>
   </header>
@@ -239,14 +340,14 @@ cab_x2_PLA</div>
   <main class="wrap">
     <section class="block center" id="features">
       <div class="kicker">Features</div>
-      <h2>Everything you check on the printer, from your desk.</h2>
-      <p class="sub">Built for people running more than one U1. Every printer gets the same detailed card, side by side.</p>
+      <h2>Everything you check on your Snapmaker U1, from your desk.</h2>
+      <p class="sub">Built for makers running one or more Snapmaker U1 printers. Every printer gets the same detailed card, side by side, updated every two seconds.</p>
       <div class="grid">
-        <div class="feat"><div class="ic">📊</div><h3>Live tray progress</h3><p>One icon per printer next to the clock. It shows the percentage, fills as the print runs and changes color for paused, done, error and offline.</p></div>
-        <div class="feat"><div class="ic">📷</div><h3>Built-in camera</h3><p>The stock U1 camera doesn't stream on its own. The app wakes it up automatically and shows the live view.</p></div>
+        <div class="feat"><div class="ic">📊</div><h3>Live tray progress</h3><p>One icon per Snapmaker U1 next to the clock. It shows the percentage, fills as the print runs and changes color for paused, done, error and offline.</p></div>
+        <div class="feat"><div class="ic">📷</div><h3>Snapmaker U1 camera</h3><p>The stock Snapmaker U1 camera doesn't stream on its own. The app wakes it up automatically and shows the live view.</p></div>
         <div class="feat"><div class="ic">⏱</div><h3>Time and progress</h3><p>Remaining time, finish time, layer, filament used and live speed, plus the slicer thumbnail of the current job.</p></div>
-        <div class="feat"><div class="ic">🎨</div><h3>All 4 toolheads</h3><p>Filament color and type for every head, nozzle temperatures, and which head is printing right now.</p></div>
-        <div class="feat"><div class="ic">⏏</div><h3>Filament unload</h3><p>Unload one head, the heads you select, or all four, using the printer's own unload sequence.</p></div>
+        <div class="feat"><div class="ic">🎨</div><h3>All 4 toolheads</h3><p>Built for the U1 toolchanger: filament color and type for every head, nozzle temperatures, and which head is printing right now.</p></div>
+        <div class="feat"><div class="ic">⏏</div><h3>Remote filament unload</h3><p>Unload one head, the heads you select, or all four, using the Snapmaker U1's own unload sequence.</p></div>
         <div class="feat"><div class="ic">🔔</div><h3>Controls and alerts</h3><p>Pause, resume, cancel, light, speed, flow, fan and E-stop. Desktop notifications when a print finishes or fails.</p></div>
       </div>
     </section>
@@ -254,7 +355,7 @@ cab_x2_PLA</div>
     <div class="split">
       <div class="text">
         <div class="kicker">Dashboard</div>
-        <h2>One card per printer, all the detail.</h2>
+        <h2>One card per Snapmaker U1, all the detail.</h2>
         <p class="sub">Each card shows what the printer is doing right now, and everything you need to act on it.</p>
         <ul class="ticks">
           <li>Live camera with full-screen view</li>
@@ -265,43 +366,43 @@ cab_x2_PLA</div>
           <li>Start any G-code file on the printer, browse print history</li>
         </ul>
       </div>
-      <div class="img"><img src="img/card.png" alt="A single printer card in U1 Farm Control" width="691" height="1007" loading="lazy" /></div>
+      <div class="img"><img src="img/card.png" alt="Snapmaker U1 printer card with camera, progress, toolheads, filament and controls" width="691" height="1007" loading="lazy" /></div>
     </div>
 
     <div class="split rev">
       <div class="text">
         <div class="kicker">Filament</div>
-        <h2>Unload filament without walking to the printer.</h2>
+        <h2>Unload Snapmaker U1 filament without walking to the printer.</h2>
         <p class="sub">
           See what's loaded in every head and unload it with one click. The app heats the head and runs the
-          same unload sequence the touchscreen uses. It's locked while a print is running.
+          same unload sequence as the Snapmaker U1 touchscreen. It's locked while a print is running.
         </p>
       </div>
-      <div class="img"><img src="img/filament.png" alt="Filament section with unload buttons for four toolheads" width="658" height="258" loading="lazy" /></div>
+      <div class="img"><img src="img/filament.png" alt="Snapmaker U1 filament status and unload buttons for four toolheads" width="658" height="258" loading="lazy" /></div>
     </div>
 
     <div class="split">
       <div class="text">
         <div class="kicker">Setup</div>
-        <h2>Add a printer by its IP. That's it.</h2>
+        <h2>Add a Snapmaker U1 by its IP. That's it.</h2>
         <p class="sub">
-          No account and no cloud. The app talks straight to each printer on your local network
-          over its Moonraker API. Pick your language, choose one tray icon per printer or one for all,
+          No account and no cloud. The Snapmaker U1 runs Klipper with Moonraker, and the app talks
+          straight to each printer on your local network over the Moonraker API. No custom firmware needed. Pick your language, choose one tray icon per printer or one for all,
           and start with Windows if you like.
         </p>
         <div class="langs" style="justify-content:flex-start">
           <span>English</span><span>Türkçe</span><span>Deutsch</span><span>Español</span><span>Français</span>
         </div>
       </div>
-      <div class="img" style="max-width:543px;justify-self:center"><img src="img/settings.png" alt="Settings dialog with printer IPs and language selector" width="543" height="474" loading="lazy" /></div>
+      <div class="img" style="max-width:543px;justify-self:center"><img src="img/settings.png" alt="Settings dialog with Snapmaker U1 IP addresses and language selector" width="543" height="474" loading="lazy" /></div>
     </div>
 
     <section class="block center" id="how">
       <div class="kicker">Get started</div>
-      <h2>Up and running in a minute.</h2>
+      <h2>Set up Snapmaker U1 monitoring in a minute.</h2>
       <div class="steps" style="text-align:left">
         <div class="step"><h3>Download</h3><p>Grab the installer or the portable exe from the <a href="https://github.com/g4zi/u1-farm-control/releases/latest">latest release</a>.</p></div>
-        <div class="step"><h3>Add your printers</h3><p>Enter each U1's local IP address. You'll find it in the printer's network settings or your router's device list.</p></div>
+        <div class="step"><h3>Add your printers</h3><p>Enter each Snapmaker U1's local IP address. You'll find it in the printer's network settings or your router's device list.</p></div>
         <div class="step"><h3>Minimize</h3><p>The window goes to the tray. Glance at the clock to see how every print is doing.</p></div>
       </div>
     </section>
@@ -309,19 +410,20 @@ cab_x2_PLA</div>
     <section class="block" id="faq">
       <div class="center">
         <div class="kicker">FAQ</div>
-        <h2>Questions</h2>
+        <h2>Snapmaker U1 Farm Control FAQ</h2>
       </div>
       <div class="faq">
-        <details><summary>Does it need custom firmware?</summary><p>No. It works with the stock Snapmaker U1 firmware (tested with 2.0.0.205). Your PC and printers just need to be on the same local network.</p></details>
+        <details><summary>Does U1 Farm Control need custom Snapmaker U1 firmware?</summary><p>No. It works with the stock Snapmaker U1 firmware (tested with 2.0.0.205). Your PC and printers just need to be on the same local network.</p></details>
         <details><summary>Windows says the app is unrecognized. Is it safe?</summary><p>The executables aren't code-signed yet, so SmartScreen shows a warning for new downloads. Click <b>More info → Run anyway</b>. The full source is on GitHub and every release is built by GitHub Actions from that source.</p></details>
-        <details><summary>Why is the camera only about 1 frame per second?</summary><p>That's the limit of the stock firmware's camera snapshot. The app wakes the camera up and keeps it running while the dashboard is open, and stops when the window is hidden.</p></details>
+        <details><summary>Why is the Snapmaker U1 camera only about 1 frame per second?</summary><p>That's the limit of the stock Snapmaker U1 firmware's camera snapshot. The app wakes the camera up and keeps it running while the dashboard is open, and stops when the window is hidden.</p></details>
+        <details><summary>How many Snapmaker U1 printers can I monitor?</summary><p>As many as you like. Each Snapmaker U1 gets its own card on the dashboard and, optionally, its own tray icon.</p></details>
         <details><summary>Does it work on macOS or Linux?</summary><p>Only Windows builds are published today. The app is built with Electron, so other platforms are possible. Contributions are welcome.</p></details>
-        <details><summary>Is this an official Snapmaker app?</summary><p>No. It's a free community project, not affiliated with or endorsed by Snapmaker. Actions like filament unload and emergency stop move your printer; use them at your own risk.</p></details>
+        <details><summary>Is this an official Snapmaker app?</summary><p>No. It's a free community project for Snapmaker U1 owners, not affiliated with or endorsed by Snapmaker. Actions like filament unload and emergency stop move your printer; use them at your own risk.</p></details>
       </div>
     </section>
 
     <div class="final">
-      <h2>Keep an eye on every print.</h2>
+      <h2>Keep an eye on every Snapmaker U1 print.</h2>
       <p class="sub" style="margin:0 auto 28px">Free and open source under the MIT license.</p>
       <div class="cta">
         <a class="btn primary" href="https://github.com/g4zi/u1-farm-control/releases/latest">Download for Windows</a>
@@ -331,8 +433,8 @@ cab_x2_PLA</div>
   </main>
 
   <footer>
-    U1 Farm Control · <a href="https://github.com/g4zi/u1-farm-control">github.com/g4zi/u1-farm-control</a> · MIT License<br />
-    Not affiliated with Snapmaker. "Snapmaker" and "U1" are trademarks of their respective owner.
+    U1 Farm Control: free Snapmaker U1 print farm monitor for Windows · <a href="https://github.com/g4zi/u1-farm-control">github.com/g4zi/u1-farm-control</a> · MIT License<br />
+    Community project, not affiliated with or endorsed by Snapmaker. "Snapmaker" and "U1" are trademarks of their respective owner.
   </footer>
 
   <script>
